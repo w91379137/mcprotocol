@@ -35,7 +35,7 @@
 var net = require("net");
 var _ = require("underscore");
 var util = require("util");
-var effectiveDebugLevel = 0; // intentionally global, shared between connections
+var effectiveDebugLevel = 100; // intentionally global, shared between connections
 var monitoringTime = 10;
 
 module.exports = MCProtocol;
@@ -749,7 +749,7 @@ MCProtocol.prototype.sendReadPacket = function() {
 	var i, j, curLength, returnedBfr, routerLength;
 	var flagReconnect = false;
 	
-	outputLog("SendReadPacket called",1,self.connectionID);
+	outputLog("█ SendReadPacket called",1,self.connectionID);
 	
 	for (i = 0;i < self.readPacketArray.length; i++) {
 		if (self.readPacketArray[i].sent) { continue; }
@@ -1112,6 +1112,8 @@ MCProtocol.prototype.readResponse = function(data) {
 				} else {
 					dataObject[self.globalReadBlockList[i].itemReference[k].useraddr] = self.globalReadBlockList[i].itemReference[k].value;				
 				}
+				// 讀取時 項目檢視
+				// console.log('readResponse', self.globalReadBlockList[i].itemReference)
 			}
 		}
 		
@@ -1925,14 +1927,15 @@ function stringToMCAddr(addr, useraddr, octalInputOutput) {
 		theItem.requestOffset = theItem.offset;
 		theItem.dtypelen = 1;	
 		break;		
-	break;
+	case "W":
 	case "TN": // Current time value
 	case "CN": // Current count value
 	case "D":
 	case "R":
 		// These are the double-byte types
 		theItem.addrtype = prefix;
-		if (typeof(postDotNumeric) !== 'undefined') {
+		
+		if (typeof(postDotNumeric) !== 'undefined' || theItem.addrtype === "W") {
 			theItem.datatype = 'X';
 			theItem.bitOffset = postDotNumeric;
 		} else {				
@@ -1982,6 +1985,9 @@ function stringToMCAddr(addr, useraddr, octalInputOutput) {
 	}
 	
 	switch (theItem.addrtype) {
+	case "W":
+		theItem.areaMCCode = 0x5720;
+		break;
 	case "D":	// Data
 		theItem.areaMCCode = 0x4420;
 //		theItem.maxWordLen = 64;
@@ -2106,6 +2112,7 @@ function PLCItem() { // Object
 		}
 		switch (this.addrtype) {
 		case "D":	// Data
+		case "W":
 		case "R":	// Extension
 		case "TN":	// Timer current value
 			return 64;
@@ -2144,6 +2151,9 @@ function PLCItem() { // Object
 			} else {
 				return 2;
 			}
+			case "W":
+				return 4;
+
 		case "TN":	// Timer current value
 			return 2;
 		case "CN":	// Counter current value
