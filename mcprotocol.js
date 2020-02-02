@@ -1930,9 +1930,9 @@ function stringToMCAddr(addr, useraddr, octalInputOutput) {
 	case "W":
 		theItem.addrtype = prefix;
 		
-		theItem.dtypelen = 4;
-		theItem.multidtypelen = 4;
-		theItem.datatype = "DINT";
+		theItem.dtypelen = 2;
+		theItem.multidtypelen = 2;
+		theItem.datatype = "INT";
 
 		theItem.remainder = 0;
 		theItem.requestOffset = theItem.offset;
