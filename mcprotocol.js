@@ -1928,6 +1928,15 @@ function stringToMCAddr(addr, useraddr, octalInputOutput) {
 		theItem.dtypelen = 1;	
 		break;		
 	case "W":
+		theItem.addrtype = prefix;
+		
+		theItem.dtypelen = 4;
+		theItem.multidtypelen = 4;
+		theItem.datatype = "DINT";
+
+		theItem.remainder = 0;
+		theItem.requestOffset = theItem.offset;
+		break;
 	case "TN": // Current time value
 	case "CN": // Current count value
 	case "D":
@@ -1935,7 +1944,7 @@ function stringToMCAddr(addr, useraddr, octalInputOutput) {
 		// These are the double-byte types
 		theItem.addrtype = prefix;
 		
-		if (typeof(postDotNumeric) !== 'undefined' || theItem.addrtype === "W") {
+		if (typeof(postDotNumeric) !== 'undefined') {
 			theItem.datatype = 'X';
 			theItem.bitOffset = postDotNumeric;
 		} else {				
@@ -1978,7 +1987,12 @@ function stringToMCAddr(addr, useraddr, octalInputOutput) {
 	}
 
 	// bitNative indicates if we have a bit data type within the PLC.
-	if (theItem.addrtype === "D" || theItem.addrtype === "R" || theItem.addrtype === "TN" || theItem.addrtype === "CN") {
+	if (
+		theItem.addrtype === "D" || 
+		theItem.addrtype === "W" || 
+		theItem.addrtype === "R" || 
+		theItem.addrtype === "TN" || 
+		theItem.addrtype === "CN") {
 		theItem.bitNative = false;
 	} else {
 		theItem.bitNative = true;
@@ -2143,6 +2157,7 @@ function PLCItem() { // Object
 		}
 		switch (this.addrtype) {
 		case "D":	// Data
+		case "W":
 		case "R":	// Extension
 			if (this.datatype === "REAL" || this.datatype === "DINT" || this.datatype === "DWORD") {
 				return 4;
@@ -2151,9 +2166,6 @@ function PLCItem() { // Object
 			} else {
 				return 2;
 			}
-			case "W":
-				return 4;
-
 		case "TN":	// Timer current value
 			return 2;
 		case "CN":	// Counter current value
